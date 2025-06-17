@@ -1,24 +1,64 @@
 #!/bin/bash
 
-if [ ! -f ~/.local/bin/apt-proxy ]; then
-    mkdir -p ~/.local/bin
-    cp apt-proxy ~/.local/bin/
+REPO_URL="https://github.com/jdkarner/ap.git"
+REPO_DIR="$HOME/ap"
+SCRIPT_NAME="apt-proxy"
+
+# Clone the repo if not present (for curl | sh usage)
+if [ ! -f "$REPO_DIR/$SCRIPT_NAME" ]; then
+    git clone "$REPO_URL" "$REPO_DIR"
 fi
 
-if [ ! -d ~/.bash_completion.d ]; then
-    mkdir -p ~/.bash_completion.d
+# Install apt-proxy to ~/.local/bin
+mkdir -p "$HOME/.local/bin"
+cp "$REPO_DIR/$SCRIPT_NAME" "$HOME/.local/bin/"
+
+# Install apt-proxy to /usr/local/bin (requires sudo)
+if [ -w /usr/local/bin ]; then
+    cp "$REPO_DIR/$SCRIPT_NAME" /usr/local/bin/
+else
+    sudo cp "$REPO_DIR/$SCRIPT_NAME" /usr/local/bin/
 fi
-if [ ! -f ~/.bash_completion.d/apt-proxy ]; then
-    cp /usr/share/bash-completion/completions/apt ~/.bash_completion.d/apt-proxy
-    if [ $(grep -c apt-proxy ~/.bash_completion.d/apt-proxy) -eq 0 ]; then
-        sed -i 's/complete -F _apt apt/complete -F _apt apt-proxy/' ~/.bash_completion.d/apt-proxy
+
+# Set up bash completion
+mkdir -p "$HOME/.bash_completion.d"
+if [ ! -f "$HOME/.bash_completion.d/apt-proxy" ]; then
+    cp /usr/share/bash-completion/completions/apt "$HOME/.bash_completion.d/apt-proxy"
+    if ! grep -q apt-proxy "$HOME/.bash_completion.d/apt-proxy"; then
+        sed -i 's/complete -F _apt apt/complete -F _apt apt-proxy/' "$HOME/.bash_completion.d/apt-proxy"
     fi
 fi
-if [ $(grep -c "~/\.bash_completion\.d" ~/.bashrc) -eq 0 ]; then
-    echo -e "if [ -d ~/.bash_completion.d ]; then\n    for f in ~/.bash_completion.d/*; do\n        . \"\$f\"\n    done\nfi" >> ~/.bashrc
+
+# Add sourcing of bash_completion.d to .bashrc if not present
+if ! grep -q "\.bash_completion\.d" "$HOME/.bashrc"; then
+    cat << 'EOF' >> "$HOME/.bashrc"
+if [ -d ~/.bash_completion.d ]; then
+    for f in ~/.bash_completion.d/*; do
+        . "$f"
+    done
 fi
-if [ -f ~/.zshrc ]; then
-    if [ $(grep -c "~/\.bash_completion\.d" ~/.zshrc) -eq 0 ]; then
-        echo -e "if [ -d ~/.bash_completion.d ]; then\n    for f in ~/.bash_completion.d/*; do\n        . \"\$f\"\n    done\nfi" >> ~/.zshrc
-    fi
+EOF
 fi
+
+# Add sourcing to .zshrc if present and not already added
+if [ -f "$HOME/.zshrc" ] && ! grep -q "\.bash_completion\.d" "$HOME/.zshrc"; then
+    cat << 'EOF' >> "$HOME/.zshrc"
+if [ -d ~/.bash_completion.d ]; then
+    for f in ~/.bash_completion.d/*; do
+        . "$f"
+    done
+fi
+EOF
+fi
+
+# Add alias 'ap' for apt-proxy to .bashrc if not present
+if ! grep -q "alias ap=" "$HOME/.bashrc"; then
+    echo "alias ap='apt-proxy'" >> "$HOME/.bashrc"
+fi
+
+# Add alias to .zshrc if present and not already added
+if [ -f "$HOME/.zshrc" ] && ! grep -q "alias ap=" "$HOME/.zshrc"; then
+    echo "alias ap='apt-proxy'" >> "$HOME/.zshrc"
+fi
+
+echo "Setup complete. Restart your shell or run 'source ~/.bashrc' or 'source ~/.zshrc' to use 'ap' and completions."
