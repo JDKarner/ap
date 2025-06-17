@@ -4,6 +4,13 @@ curl -sSL https://raw.githubusercontent.com/jdkarner/ap/main/setup-apt-proxy.sh 
 ```
 best practice is to print that on a QR code and just scan
 
+```
+ap for apt-proxy
+apd for ap update && ap dist upgrade -y
+apf for ap update && ap full-upgrade -y
+
+```
+
 # work-scripts
 
 
