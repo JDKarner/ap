@@ -1,7 +1,7 @@
 # Forked to make apt-proxy simpler
-'''
- curl -sSL https://raw.githubusercontent.com/jdkarner/ap/main/setup-apt-proxy.sh | bash
-'''
+```
+curl -sSL https://raw.githubusercontent.com/jdkarner/ap/main/setup-apt-proxy.sh | bash
+```
 best practice is to print that on a QR code and just scan
 
 # work-scripts
