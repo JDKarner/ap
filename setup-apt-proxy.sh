@@ -56,9 +56,28 @@ if ! grep -q "alias ap=" "$HOME/.bashrc"; then
     echo "alias ap='apt-proxy'" >> "$HOME/.bashrc"
 fi
 
-# Add alias to .zshrc if present and not already added
-if [ -f "$HOME/.zshrc" ] && ! grep -q "alias ap=" "$HOME/.zshrc"; then
-    echo "alias ap='apt-proxy'" >> "$HOME/.zshrc"
+# Add alias 'apd' for update & dist-upgrade to .bashrc if not present
+if ! grep -q "alias apd=" "$HOME/.bashrc"; then
+    echo "alias apd=\"ap update && ap dist-upgrade -y\"" >> "$HOME/.bashrc"
 fi
 
-echo "Setup complete. Restart your shell or run 'source ~/.bashrc' or 'source ~/.zshrc' to use 'ap' and completions."
+# Add alias 'apf' for update & full-upgrade to .bashrc if not present
+if ! grep -q "alias apf=" "$HOME/.bashrc"; then
+    echo "alias apf=\"ap update && ap full-upgrade -y\"" >> "$HOME/.bashrc"
+fi
+
+# Add alias to .zshrc if present and not already added
+if [ -f "$HOME/.zshrc" ]; then
+    if ! grep -q "alias ap=" "$HOME/.zshrc"; then
+        echo "alias ap='apt-proxy'" >> "$HOME/.zshrc"
+    fi
+    if ! grep -q "alias apd=" "$HOME/.zshrc"; then
+        echo "alias apd=\"ap update && ap dist-upgrade -y\"" >> "$HOME/.zshrc"
+    fi
+    if ! grep -q "alias apf=" "$HOME/.zshrc"; then
+        echo "alias apf=\"ap update && ap full-upgrade -y\"" >> "$HOME/.zshrc"
+    fi
+fi
+
+echo "Setup complete. Restart your shell or run 'source ~/.bashrc' or 'source ~/.zshrc' to use 'ap', 'apd', 'apf' and completions."
+
